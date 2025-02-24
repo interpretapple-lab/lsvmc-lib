@@ -561,11 +561,14 @@ class xSVMC(SVC):
             for i in range(n_samples):
                 membershipAAD = xAAD(memberships[i][0], membership_misvs[i][0])
                 nonmembershipAAD = xAAD(nonmemberships[i][0], nonmembership_misvs[i][0])
-                ifsElem = xAIFSElement(membershipAAD, nonmembershipAAD)
-                ifsElem = ifsElem.normalize(eta[i])
+                
                 if buoyancy[i][0] > 0: 
+                   ifsElem = xAIFSElement(membershipAAD, nonmembershipAAD)  # Assign the membership level according the prediction
+                   ifsElem = ifsElem.normalize(eta[i])
                    prediction = xPrediction(cs[1], ifsElem)
                 else:
+                   ifsElem = xAIFSElement(nonmembershipAAD, membershipAAD) # Assign the membership level according the prediction
+                   ifsElem = ifsElem.normalize(eta[i])
                    prediction = xPrediction(cs[0], ifsElem)
 
                 ret[i] = prediction
@@ -928,10 +931,11 @@ class xSVMC(SVC):
             ret = np.full(shape=(n_samples,1),fill_value=None)
             for i in range(n_samples):
                 evals_per_sample = evals[i]
-                if evals_per_sample[0].buoyancy > 0: 
-                    ret[i,:] = np.array([xPrediction(cs[1],evals_per_sample[0])])
+                idx_membership, idx_nonmembership = 0, 1
+                if evals_per_sample[idx_membership].buoyancy > 0: 
+                    ret[i,:] = np.array([xPrediction(cs[1],evals_per_sample[idx_membership])]) #
                 else:
-                    ret[i,:] = np.array([xPrediction(cs[0],evals_per_sample[0])])
+                    ret[i,:] = np.array([xPrediction(cs[0],evals_per_sample[idx_nonmembership])])
             return ret
         
 
